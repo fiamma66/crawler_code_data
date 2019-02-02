@@ -32,11 +32,14 @@ def get_pixnet_image_urls(soup):
     # 傳入 BeautifulSoup 處理後的 soup
 
     # 此方法回傳 Urls List
+    import re
     pixnet_content = soup.find("div", id="article-content-inner")
     images_url = []
+    pattern = r"http\://farm2*"
     images = pixnet_content.find_all("img")
     for image in images:
-        images_url.append(image["src"])
+        if re.match(pattern,image["src"]):
+            images_url.append(image["src"])
 
     return images_url
 
@@ -85,7 +88,7 @@ def get_candicecity_images_url(soup):
     images = content.find_all("img")
     for image in images:
         if re.match(pattern, image["src"]):
-            images_url.append(image)
+            images_url.append("https:"+image["src"])
 
 
     return images_url
