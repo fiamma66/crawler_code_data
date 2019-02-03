@@ -1,7 +1,4 @@
-
-# Pixnet crawler
-from bs4 import BeautifulSoup
-
+# use in crawler
 
 def get_pixnet_content(soup):
 
@@ -38,7 +35,7 @@ def get_pixnet_image_urls(soup):
     pattern = r"http\://farm2*"
     images = pixnet_content.find_all("img")
     for image in images:
-        if re.match(pattern,image["src"]):
+        if re.match(pattern, image["src"]):
             images_url.append(image["src"])
 
     return images_url
@@ -90,9 +87,36 @@ def get_candicecity_images_url(soup):
         if re.match(pattern, image["src"]):
             images_url.append("https:"+image["src"])
 
-
     return images_url
 
 
+def get_lanlan_content(soup):
+    import re
+    content = soup.find("div", class_="entry-content")
+    removes = content.find_all("script")
+    for remove in removes:
+        remove.extract()
+
+    removes = content.find_all("ins")
+    for remove in removes:
+        remove.extract()
+
+    removes = content.find_all("a")
+    for remove in removes:
+        remove.extract()
+
+    content = re.sub(r"\W+", "", content.text)
+    return content
 
 
+def get_lanlan_images_url(soup):
+    import re
+    pattern = r"https?\://image\.lanlan\.tw/[^emotion]"
+    content = soup.find("div", class_="entry-content")
+    images = content.find_all("img")
+    images_url = []
+    for image in images:
+        if re.match(pattern, image["src"]):
+            images_url.append(image["src"])
+
+    return images_url
