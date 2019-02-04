@@ -1,5 +1,6 @@
 # use in crawler
 
+
 def get_pixnet_content(soup):
 
     # 傳入 經過BeautifulSoup 處理的 soup
@@ -118,5 +119,39 @@ def get_lanlan_images_url(soup):
     for image in images:
         if re.match(pattern, image["src"]):
             images_url.append(image["src"])
+
+    return images_url
+
+
+def get_vivawei_content(soup):
+    import re
+    content = soup.find("div", class_="desc")
+    removes = content.find_all("script")
+    for remove in removes:
+        remove.extract()
+
+    removes = content.find_all("ins")
+    for remove in removes:
+        remove.extract()
+
+    removes = content.find_all("a")
+    for remove in removes:
+        remove.extract()
+
+    content = re.sub(r"\W+", "", content.text)
+
+    return content
+
+
+def get_vivawei_images_url(soup):
+    import re
+    content = soup.find("div", class_="desc")
+    images = content.find_all("img")
+    images_url = []
+    for image in images:
+        if re.match(r"https?", image["src"]):
+            images_url.append(image["src"])
+        else:
+            images_url.append("https:" + image["src"])
 
     return images_url
