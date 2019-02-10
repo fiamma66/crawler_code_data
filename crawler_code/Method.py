@@ -3,13 +3,16 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_pixnet_content(url):
+def get_pixnet_content(url, headers):
 
     # 傳入 經過BeautifulSoup 處理的 soup
     # 若出現亂碼情況 請在requests.get()之後
     # 加入encoding = 'utf-8'
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     pixnet_content = soup.find("div", id="article-content-inner")
@@ -30,13 +33,16 @@ def get_pixnet_content(url):
     return pixnet_content
 
 
-def get_pixnet_image_urls(url):
+def get_pixnet_image_urls(url, headers):
 
     # 傳入 BeautifulSoup 處理後的 soup
 
     # 此方法回傳 Urls List
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     pixnet_content = soup.find("div", id="article-content-inner")
@@ -50,13 +56,16 @@ def get_pixnet_image_urls(url):
     return images_url
 
 
-def get_candicecity_content(url):
+def get_candicecity_content(url, headers):
 
     # 傳入 經過BeautifulSoup 處理的 soup
     # 若出現亂碼情況 請在requests.get()之後
     # 加入encoding = 'utf-8'
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="entry-content")
@@ -89,9 +98,12 @@ def get_candicecity_content(url):
     return clean_content
 
 
-def get_candicecity_images_url(url):
+def get_candicecity_images_url(url, headers):
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="entry-content")
@@ -105,9 +117,12 @@ def get_candicecity_images_url(url):
     return images_url
 
 
-def get_lanlan_content(url):
+def get_lanlan_content(url, headers):
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="entry-content")
@@ -127,9 +142,12 @@ def get_lanlan_content(url):
     return content
 
 
-def get_lanlan_images_url(url):
+def get_lanlan_images_url(url, headers):
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     pattern = r"https?\://image\.lanlan\.tw/[^emotion]"
@@ -143,9 +161,12 @@ def get_lanlan_images_url(url):
     return images_url
 
 
-def get_vivawei_content(url):
+def get_vivawei_content(url, headers):
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="desc")
@@ -166,9 +187,12 @@ def get_vivawei_content(url):
     return content
 
 
-def get_vivawei_images_url(url):
+def get_vivawei_images_url(url, headers):
     import re
-    resp = requests.get(url=url)
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="desc")
@@ -179,5 +203,44 @@ def get_vivawei_images_url(url):
             images_url.append(image["src"])
         else:
             images_url.append("https:" + image["src"])
+
+    return images_url
+
+
+def get_maiimage_content(url, headers):
+    import re
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
+    resp.encoding = "utf-8"
+    soup = BeautifulSoup(resp.text)
+    content = soup.find("div", id="zi_ad_article_inread")
+    removes = content.find_all("ins")
+    for remove in removes:
+        remove.extract()
+
+    removes = content.find_all("a")
+    for remove in removes:
+        remove.extract()
+
+    content = re.sub(r"\W+", "", content.text)
+
+    return content
+
+
+def get_maiimage_images_url(url, headers):
+
+    if headers is None:
+        resp = requests.get(url=url)
+    else:
+        resp = requests.get(url=url, headers=headers)
+    resp.encoding = "utf-8"
+    soup = BeautifulSoup(resp.text)
+    content = soup.find("div", id="zi_ad_article_inread")
+    images_url = []
+    images = content.find_all("img")
+    for image in images:
+        images_url.append("https:" + image["src"])
 
     return images_url
