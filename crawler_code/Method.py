@@ -36,7 +36,7 @@ def get_pixnet_content(url, headers=None):
 def get_pixnet_image_urls(url, headers=None):
 
     # 傳入 BeautifulSoup 處理後的 soup
-
+    import re
     # 此方法回傳 Urls List
 
     if headers is None:
@@ -47,10 +47,11 @@ def get_pixnet_image_urls(url, headers=None):
     soup = BeautifulSoup(resp.text)
     pixnet_content = soup.find("div", id="article-content-inner")
     images_url = []
-
+    pattern = r"(jpg)$"
     images = pixnet_content.find_all("img")
     for image in images:
-        images_url.append(image["src"])
+        if re.search(pattern,image["src"]):
+           images_url.append(image["src"])
 
     return images_url
 
@@ -106,11 +107,11 @@ def get_candicecity_images_url(url, headers=None):
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
     content = soup.find("div", class_="entry-content")
-    pattern = r"//candicecity*"
+    pattern = r"(jpg)$"
     images_url = []
     images = content.find_all("img")
     for image in images:
-        if re.match(pattern, image["src"]):
+        if re.search(pattern, image["src"]):
             images_url.append("https:"+image["src"])
 
     return images_url
@@ -149,12 +150,12 @@ def get_lanlan_images_url(url, headers=None):
         resp = requests.get(url=url, headers=headers)
     resp.encoding = "utf-8"
     soup = BeautifulSoup(resp.text)
-    pattern = r"https?\://image\.lanlan\.tw/[^emotion]"
+    pattern = r"(jpg)$"
     content = soup.find("div", class_="entry-content")
     images = content.find_all("img")
     images_url = []
     for image in images:
-        if re.match(pattern, image["src"]):
+        if re.search(pattern, image["src"]):
             images_url.append(image["src"])
 
     return images_url
