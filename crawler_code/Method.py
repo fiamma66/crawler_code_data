@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_pixnet_content(url, headers):
+def get_pixnet_content(url, headers=None):
 
     # 傳入 經過BeautifulSoup 處理的 soup
     # 若出現亂碼情況 請在requests.get()之後
@@ -33,12 +33,12 @@ def get_pixnet_content(url, headers):
     return pixnet_content
 
 
-def get_pixnet_image_urls(url, headers):
+def get_pixnet_image_urls(url, headers=None):
 
     # 傳入 BeautifulSoup 處理後的 soup
 
     # 此方法回傳 Urls List
-    import re
+
     if headers is None:
         resp = requests.get(url=url)
     else:
@@ -55,7 +55,7 @@ def get_pixnet_image_urls(url, headers):
     return images_url
 
 
-def get_candicecity_content(url, headers):
+def get_candicecity_content(url, headers=None):
 
     # 傳入 經過BeautifulSoup 處理的 soup
     # 若出現亂碼情況 請在requests.get()之後
@@ -97,7 +97,7 @@ def get_candicecity_content(url, headers):
     return clean_content
 
 
-def get_candicecity_images_url(url, headers):
+def get_candicecity_images_url(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -116,7 +116,7 @@ def get_candicecity_images_url(url, headers):
     return images_url
 
 
-def get_lanlan_content(url, headers):
+def get_lanlan_content(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -141,7 +141,7 @@ def get_lanlan_content(url, headers):
     return content
 
 
-def get_lanlan_images_url(url, headers):
+def get_lanlan_images_url(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -160,7 +160,7 @@ def get_lanlan_images_url(url, headers):
     return images_url
 
 
-def get_vivawei_content(url, headers):
+def get_vivawei_content(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -186,7 +186,7 @@ def get_vivawei_content(url, headers):
     return content
 
 
-def get_vivawei_images_url(url, headers):
+def get_vivawei_images_url(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -206,7 +206,7 @@ def get_vivawei_images_url(url, headers):
     return images_url
 
 
-def get_maiimage_content(url, headers):
+def get_maiimage_content(url, headers=None):
     import re
     if headers is None:
         resp = requests.get(url=url)
@@ -228,7 +228,7 @@ def get_maiimage_content(url, headers):
     return content
 
 
-def get_maiimage_images_url(url, headers):
+def get_maiimage_images_url(url, headers=None):
 
     if headers is None:
         resp = requests.get(url=url)
