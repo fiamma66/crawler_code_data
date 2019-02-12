@@ -47,11 +47,10 @@ def get_pixnet_image_urls(url, headers):
     soup = BeautifulSoup(resp.text)
     pixnet_content = soup.find("div", id="article-content-inner")
     images_url = []
-    pattern = r"http\://farm2*"
+
     images = pixnet_content.find_all("img")
     for image in images:
-        if re.match(pattern, image["src"]):
-            images_url.append(image["src"])
+        images_url.append(image["src"])
 
     return images_url
 
