@@ -1,17 +1,14 @@
-import requests, pandas as pd
-from datetime import datetime, timedelta, timezone
+import requests
 from bs4 import BeautifulSoup
 import logging
-# from pythonjsonlogger import jsonlogger
-#import logmatic
-import os
 from jieba.analyse import extract_tags
-import sys
 import logstash
-import time, random
+import time
+import random
 import pymongo
 from pymongo.errors import BulkWriteError
-import jieba , re
+import jieba
+import re
 from Mongo_account import MongoBase
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -19,38 +16,40 @@ host = '10.120.14.105'
 client = "mongodb://" + host + ":27017/"
 # 多執行續下 可能被 dead lock
 myclient = pymongo.MongoClient(client,
-                               username = MongoBase.username,
-                               password = MongoBase.password,
-                               authSource = MongoBase.authSource,
-                               authMechanism= MongoBase.authMechanism,
+                               username=MongoBase.username,
+                               password=MongoBase.password,
+                               authSource=MongoBase.authSource,
+                               authMechanism=MongoBase.authMechanism,
                                connect=False)
 # 選擇 DB
 mydb = myclient["cb104_G3"]
 # 選擇 collection
-mycol = mydb["Ptt_fix_security"]
+mycol = mydb["ptt_fix"]
 
 jieba.load_userdict("dict.txt.big")
 
 proxylist = [{"http": "37.187.120.123:80"},
              {"https": "178.128.31.153:8080"},
              {"http": "167.114.180.102:8080"},
-             {"https" : "218.48.229.153:808"},
-             {"http" : "85.30.219.120:46761"},
-             {"http" : "183.101.103.164:8080"},
+             {"https": "218.48.229.153:808"},
+             {"http": "85.30.219.120:46761"},
+             {"http": "183.101.103.164:8080"},
              {"http": "167.114.196.153:80"},
-            {"http":"220.132.207.11:45069"}]
-header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'}
+             {"http": "220.132.207.11:45069"}]
+header = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'}
 
 
 logger = logging.getLogger('python-logstash-logger')
 logger.setLevel(logging.INFO)
-logger.addHandler(logstash.TCPLogstashHandler(host,5959))
+logger.addHandler(logstash.TCPLogstashHandler(host, 5959))
 
-def get_url(n=2,m=3):
+
+def get_url(n=2, m=3):
     result = []
     # 增加直覺 從第n頁 到 第m頁
     m = m + 1
-    for t in range(n,m):
+    for t in range(n, m):
         url = "https://www.ptt.cc/bbs/Food/index" + str(t) + ".html"
         result.append(url)
     return result
@@ -170,7 +169,7 @@ def parse(urls):
                             author = val[0].text
 
                             date_in_content = val[3].text
-                        except IndexError as e:
+                        except IndexError:
                             logger.warning("article span list out of index", exc_info=True, extra={"url": href})
                             author = ""
                             date_in_content = ""
@@ -221,8 +220,7 @@ def parse(urls):
 
                         try:
                             content = content.text.replace("\r", "").replace("\n", "").replace(" ", "")
-                            content = re.sub(r"\W+", "", content)
-                        except AttributeError as e:
+                        except AttributeError:
                             logger.warning("content text cant regularize", exc_info=True, extra={"url": href})
 
                         result.append({
@@ -259,11 +257,11 @@ def parse(urls):
 
 
 def main(n, m):
-    with ThreadPoolExecutor(max_workers=30,thread_name_prefix="ptt_crawler") as executor:
+    with ThreadPoolExecutor(max_workers=30, thread_name_prefix="ptt_crawler") as executor:
         future_result = {executor.submit(parse, url): url for url in get_url(n, m)}
     for future in as_completed(future_result):
         logger.info("Worker's job done", exc_info=True)
 
 
 if __name__ == "__main__":
-    main(7001,7002)
+    main(2,7002)

@@ -14,30 +14,31 @@ host = '10.120.14.105'
 client = "mongodb://" + host + ":27017/"
 # 多執行續下 可能被 dead lock
 myclient = pymongo.MongoClient(client,
-                               username= MongoBase.username,
-                               password= MongoBase.password,
-                               authSource= MongoBase.authSource,
-                               authMechanism= MongoBase.authMechanism,
-                               connect= False)
+                               username=MongoBase.username,
+                               password=MongoBase.password,
+                               authSource=MongoBase.authSource,
+                               authMechanism=MongoBase.authMechanism,
+                               connect=False)
 mydb = myclient["cb104_G3"]
-mycol = mydb["Mobile01"]
+mycol = mydb["M1_fix"]
 
 logger = logging.getLogger('python-logstash-logger')
 logger.setLevel(logging.INFO)
 
-logger.addHandler(logstash.TCPLogstashHandler(host,5959))
+logger.addHandler(logstash.TCPLogstashHandler(host, 5959))
+
 
 def get_url(n=1, m=2):
     result = []
     # 增加直覺 從第n頁 到 第m頁
-    m= m + 1
+    m = m + 1
     for t in range(n, m):
-        url= "https://www.mobile01.com/waypointlist.php?list=1&c=0&s=desc&pid=2&p=" + str(t)
+        url = "https://www.mobile01.com/waypointlist.php?list=1&c=0&s=desc&pid=2&p=" + str(t)
         result.append(url)
     return result
 
 
-proxylist= [{"http": "37.187.120.123:80"},
+proxylist = [{"http": "37.187.120.123:80"},
              {"https": "206.189.36.198:8080"},
              {"https": "178.128.31.153:8080"},
              {"http": "167.114.180.102:8080"},
@@ -61,7 +62,9 @@ def get_connect(url):
             resp = requests.get(url, headers=header, proxies=proxylist[i], timeout=120)
             resp.encoding = "utf-8"
             time.sleep(random.randint(1, 10) / 10)
-            logger.info("Request response", exc_info=True,extra={"url" : url, "time_use" : resp.elapsed.total_seconds(), "Response code" : resp.status_code, "proxy_use":proxylist[i]})
+            logger.info("Request response", exc_info=True,
+                        extra={"url": url, "time_use": resp.elapsed.total_seconds(),
+                               "Response code": resp.status_code, "proxy_use": proxylist[i]})
 
         except requests.exceptions.ConnectTimeout:
             logger.warning("Connect Time out", exc_info=True)
@@ -69,7 +72,7 @@ def get_connect(url):
             continue
 
         except requests.exceptions.ConnectionError:
-            logger.warning("Proxy Error", exc_info=True, extra={"proxy":proxylist[i],"url":url})
+            logger.warning("Proxy Error", exc_info=True, extra={"proxy": proxylist[i], "url": url})
 
             i = (i + 1) % len(proxylist)
             continue
@@ -101,7 +104,8 @@ def get_res_info(soup):
         point = info.find_all("div")[7].text.replace("\n", "").replace(" ", "").split(":")[-1]
         rate = len(info.find_all("div")[8].find_all("img"))
     except IndexError:
-        logger.warning("Index wrong in this page",exc_info=True,extra={"url" : soup.find("meta", property = "og:url")["content"]})
+        logger.warning("Index wrong in this page",
+                       exc_info=True, extra={"url": soup.find("meta", property="og:url")["content"]})
         pass
     res_info.append({
         "rate": rate,
@@ -220,7 +224,7 @@ def parse(urls):
                 content = art.find("div", class_="single-post-content").text.replace("\r", "").replace("\n",
                                                                                                        "").replace(" ",
                                                                                                                    "")
-                content = re.sub(r"\W+", "", content)
+
                 img_url = []
                 imgs = art.find("div", class_="single-post-content").find_all("img")
                 for img in imgs:
@@ -261,12 +265,13 @@ def parse(urls):
 
                 })
         try:
-            x= mycol.insert_many(result, ordered= False)
+            x = mycol.insert_many(result, ordered=False)
             if x.inserted_ids:
                 logger.info("Insert Successful", exc_info=True, extra={"count": len(x.inserted_ids), "index_url": urls})
         except BulkWriteError as e:
             for evey_except in e.details['writeErrors']:
-                logger.warning("DB error",exc_info=True,extra={"error_detail":evey_except["errmsg"], "index_url" : urls})
+                logger.warning("DB error", exc_info=True,
+                               extra={"error_detail": evey_except["errmsg"], "index_url": urls})
     return result
 
 
@@ -275,17 +280,8 @@ def main(n, m):
     with ThreadPoolExecutor(max_workers=15) as executor:
         future_result = {executor.submit(parse, url): url for url in get_url(n, m)}
     for future in as_completed(future_result):
-        logger.info("Jobs complete",exc_info=True)
+        logger.info("Jobs complete", exc_info=True)
 
 
 if __name__ == "__main__":
-    main(3,339)
-
-
-
-
-
-
-
-
-
+    main(1, 339)
